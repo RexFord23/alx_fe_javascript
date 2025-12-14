@@ -93,3 +93,40 @@ function addQuote() {
   
   showRandomQuote();
 }
+
+
+function saveQuotes() {
+  localStorage.setItem('quotes', JSON.stringify(quotes));
+}
+
+quotes.push({
+  text: quoteInput.value,
+  category: categoryInput.value
+});
+saveQuotes(); 
+
+
+const savedQuotes = localStorage.getItem('quotes');
+if (savedQuotes) {
+  quotes.push(...JSON.parse(savedQuotes));
+}
+
+function showRandomQuote() {
+  quoteDisplay.innerHTML = "";
+
+  const randomIndex = Math.floor(Math.random() * quotes.length);
+  const quote = quotes[randomIndex];
+
+  const quoteText = document.createElement("p");
+  quoteText.textContent = `"${quote.text}"`;
+
+  const quoteCategory = document.createElement("small");
+  quoteCategory.textContent = `Category: ${quote.category}`;
+
+  quoteDisplay.appendChild(quoteText);
+  quoteDisplay.appendChild(quoteCategory);
+
+  
+  sessionStorage.setItem('lastQuote', JSON.stringify(quote));
+}
+
