@@ -1,5 +1,3 @@
-/* ===================== GLOBAL DATA ===================== */
-
 let quotes = JSON.parse(localStorage.getItem("quotes")) || [
   { text: "The best way to predict the future is to create it.", category: "Motivation" },
   { text: "Success is not final, failure is not fatal.", category: "Success" },
@@ -9,7 +7,7 @@ let quotes = JSON.parse(localStorage.getItem("quotes")) || [
 let quoteDisplay;
 let categoryFilter;
 
-/* ===================== INIT ===================== */
+
 
 document.addEventListener("DOMContentLoaded", () => {
   quoteDisplay = document.getElementById("quoteDisplay");
@@ -25,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
   filterQuotes();
 });
 
-/* ===================== TASK 0: RANDOM QUOTE ===================== */
+
 
 function showRandomQuote(list = quotes) {
   if (list.length === 0) {
@@ -50,7 +48,6 @@ function showRandomQuote(list = quotes) {
   sessionStorage.setItem("lastQuote", JSON.stringify(quote));
 }
 
-/* ===================== ADD QUOTE FORM ===================== */
 
 function createAddQuoteForm() {
   const form = document.createElement("form");
@@ -90,13 +87,11 @@ function createAddQuoteForm() {
   document.body.appendChild(form);
 }
 
-/* ===================== TASK 1: STORAGE ===================== */
 
 function saveQuotes() {
   localStorage.setItem("quotes", JSON.stringify(quotes));
 }
 
-/* ===================== JSON EXPORT ===================== */
 
 function exportToJson() {
   const blob = new Blob([JSON.stringify(quotes, null, 2)], {
@@ -109,7 +104,6 @@ function exportToJson() {
   link.click();
 }
 
-/* ===================== JSON IMPORT ===================== */
 
 function importFromJsonFile(event) {
   const reader = new FileReader();
@@ -123,7 +117,7 @@ function importFromJsonFile(event) {
   reader.readAsText(event.target.files[0]);
 }
 
-/* ===================== TASK 2: CATEGORY FILTER ===================== */
+
 
 function populateCategories() {
   const categories = ["all", ...new Set(quotes.map(q => q.category))];
@@ -156,7 +150,7 @@ function restoreLastFilter() {
   }
 }
 
-/* ===================== TASK 3: SERVER SYNC ===================== */
+
 
 const syncStatus = document.getElementById("syncStatus");
 
@@ -170,7 +164,7 @@ async function syncWithServer() {
       category: "Server"
     }));
 
-    quotes = serverQuotes; // SERVER WINS
+    quotes = serverQuotes;
     saveQuotes();
     populateCategories();
     filterQuotes();
@@ -182,3 +176,45 @@ async function syncWithServer() {
 }
 
 setInterval(syncWithServer, 30000);
+
+
+const syncStatus = document.getElementById("syncStatus");
+
+async function fetchQuotesFromServer() {
+  const response = await fetch("https://jsonplaceholder.typicode.com/posts");
+  const data = await response.json();
+
+  return data.slice(0, 5).map(post => ({
+    text: post.title,
+    category: "Server"
+  }));
+}
+
+async function postQuoteToServer(quote) {
+  await fetch("https://jsonplaceholder.typicode.com/posts", {
+    method: "POST",
+    body: JSON.stringify(quote),
+    headers: {
+      "Content-Type": "application/json"
+    }
+  });
+}
+
+async function syncQuotes() {
+  try {
+    const serverQuotes = await fetchQuotesFromServer();
+
+    quotes = serverQuotes;
+
+    saveQuotes();
+    populateCategories();
+    filterQuotes();
+
+    syncStatus.textContent = "Quotes synced with server (server wins).";
+  } catch (error) {
+    syncStatus.textContent = "Conflict or sync error occurred.";
+  }
+}
+
+setInterval(syncQuotes, 30000);
+
