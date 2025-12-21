@@ -210,7 +210,7 @@ async function syncQuotes() {
     populateCategories();
     filterQuotes();
 
-    syncStatus.textContent = "Quotes synced with server (server wins).";
+    syncStatus.textContent = "Quotes synced with server!";
   } catch (error) {
     syncStatus.textContent = "Conflict or sync error occurred.";
   }
